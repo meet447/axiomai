@@ -42,27 +42,15 @@
 }
 
 .message-bubble {
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
+  @apply p-4 rounded-lg mb-4 max-w-[80%];
 }
 
 .message-bubble.user {
-  background-color: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-left: auto;
-  max-width: 80%;
+  @apply ml-auto bg-primary text-primary-foreground;
 }
 
 .message-bubble.assistant {
-  background-color: hsl(var(--muted));
-  color: hsl(var(--muted-foreground));
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-right: auto;
-  max-width: 80%;
+  @apply mr-auto bg-muted;
 }
 
 .think {

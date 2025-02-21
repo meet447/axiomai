@@ -5,10 +5,23 @@ import { useTheme } from "next-themes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 
+interface Message {
+  role: 'user' | 'assistant';
+  content: string | MessageContent[];
+}
+
+interface MessageContent {
+  type: 'text' | 'image_url';
+  text?: string;
+  image_url?: {
+    url: string;
+  };
+}
+
 interface Chat {
   id: string;
   title: string;
-  messages: any[];
+  messages: Message[];
   model: string;
   timestamp: number;
 }
@@ -34,58 +47,68 @@ export function ChatSidebar({
   const [chats, setChats] = useState<Chat[]>([]);
 
   useEffect(() => {
-    const savedChats = localStorage.getItem('chats');
-    if (savedChats) {
-      setChats(JSON.parse(savedChats));
+    try {
+      const savedChats = localStorage.getItem('chats');
+      if (savedChats) {
+        const parsedChats = JSON.parse(savedChats);
+        if (Array.isArray(parsedChats)) {
+          setChats(parsedChats);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading chats:', error);
+      localStorage.removeItem('chats'); // Clear corrupted data
     }
   }, []);
 
   const createNewChat = () => {
-    // Save current chat's messages if it exists
-    if (currentChatId) {
-      const savedChats = localStorage.getItem('chats');
-      if (savedChats) {
-        const existingChats = JSON.parse(savedChats);
-        const currentChat = existingChats.find((chat: Chat) => chat.id === currentChatId);
-        if (currentChat) {
-          const updatedExistingChats = existingChats.map((chat: Chat) => {
-            if (chat.id === currentChatId) {
-              return { ...chat };
-            }
-            return chat;
-          });
-          localStorage.setItem('chats', JSON.stringify(updatedExistingChats));
-        }
-      }
-    }
+    try {
+      // Generate a unique ID using timestamp and random number
+      const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    // Create new chat
-    const newChat: Chat = {
-      id: Date.now().toString(),
-      title: `New Chat ${chats.length + 1}`,
-      messages: [],
-      model: selectedModel,
-      timestamp: Date.now()
-    };
-    const updatedChats = [newChat, ...chats];
-    setChats(updatedChats);
-    localStorage.setItem('chats', JSON.stringify(updatedChats));
-    onChatSelect(newChat.id);
+      const newChat: Chat = {
+        id: uniqueId,
+        title: `New Chat ${chats.length + 1}`,
+        messages: [],
+        model: selectedModel,
+        timestamp: Date.now()
+      };
+      const updatedChats = [newChat, ...chats];
+      setChats(updatedChats);
+      localStorage.setItem('chats', JSON.stringify(updatedChats));
+      onChatSelect(newChat.id);
+    } catch (error) {
+      console.error('Error creating new chat:', error);
+    }
   };
 
   const deleteChat = (chatId: string) => {
-    const updatedChats = chats.filter(chat => chat.id !== chatId);
-    setChats(updatedChats);
-    localStorage.setItem('chats', JSON.stringify(updatedChats));
-    if (chatId === currentChatId && updatedChats.length > 0) {
-      onChatSelect(updatedChats[0].id);
+    try {
+      const updatedChats = chats.filter(chat => chat.id !== chatId);
+      setChats(updatedChats);
+      localStorage.setItem('chats', JSON.stringify(updatedChats));
+      
+      // If deleting current chat, select the next available chat
+      if (chatId === currentChatId) {
+        if (updatedChats.length > 0) {
+          onChatSelect(updatedChats[0].id);
+        } else {
+          onResetChat(); // Reset if no chats remain
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting chat:', error);
     }
   };
 
   const clearAllChats = () => {
-    setChats([]);
-    localStorage.removeItem('chats');
-    onResetChat();
+    try {
+      setChats([]);
+      localStorage.removeItem('chats');
+      onResetChat();
+    } catch (error) {
+      console.error('Error clearing chats:', error);
+    }
   };
   
   const models = [
