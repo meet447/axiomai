@@ -10,7 +10,7 @@ interface ChatWindowProps {
 
 export function ChatWindow({ chat, onSendMessage, isStreaming }: ChatWindowProps) {
   const [message, setMessage] = useState('');
-  const [selectedModel, setSelectedModel] = useState('google/gemma-2-27b-it');
+  const [selectedModel, setSelectedModel] = useState('deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -77,10 +77,24 @@ export function ChatWindow({ chat, onSendMessage, isStreaming }: ChatWindowProps
             className="bg-gray-800 text-white rounded-lg px-3 py-2 text-sm border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isStreaming}
           >
-            <option value="meta-llama/Llama-Vision-Free">Llama Vision</option>
-            <option value="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free">Llama 3.3 70B</option>
-            <option value="deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free">DeepSeek R1</option>
-            <option value="google/gemma-2-27b-it">Gemma 2 27B</option>
+            <optgroup label="Meta Llama">
+              <option value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo-128K">Llama 3.1 8B (128K)</option>
+              <option value="meta-llama/Llama-Vision-Free">Llama Vision</option>
+            </optgroup>
+            <optgroup label="DeepSeek">
+              <option value="deepseek-ai/DeepSeek-R1">DeepSeek R1</option>
+              <option value="deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free">DeepSeek R1 Distill</option>
+            </optgroup>
+            <optgroup label="Google">
+              <option value="google/gemma-2-27b-it">Gemma 2 27B</option>
+            </optgroup>
+            <optgroup label="Databricks">
+              <option value="databricks/dbrx-instruct">DBRX Instruct</option>
+            </optgroup>
+            <optgroup label="Qwen">
+              <option value="Qwen/Qwen2-72B-Instruct">Qwen2 72B</option>
+              <option value="Qwen/Qwen2.5-Coder-32B-Instruct">Qwen2.5 Coder 32B</option>
+            </optgroup>
           </select>
           <div className="flex-1 relative">
             <textarea
