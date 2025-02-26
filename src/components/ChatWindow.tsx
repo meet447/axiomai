@@ -77,9 +77,10 @@ export function ChatWindow({ chat, onSendMessage, isStreaming }: ChatWindowProps
             className="bg-gray-800 text-white rounded-lg px-3 py-2 text-sm border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isStreaming}
           >
-            <option value="google/gemma-2-27b-it">Gemma 27B</option>
-            <option value="anthropic/claude-3-opus">Claude 3</option>
-            <option value="google/gemini-pro">Gemini Pro</option>
+            <option value="meta-llama/Llama-Vision-Free">Llama Vision</option>
+            <option value="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free">Llama 3.3 70B</option>
+            <option value="deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free">DeepSeek R1</option>
+            <option value="google/gemma-2-27b-it">Gemma 2 27B</option>
           </select>
           <div className="flex-1 relative">
             <textarea
