@@ -32,3 +32,22 @@ export async function deleteChat(id: string): Promise<void> {
   const db = await initDB();
   await db.delete('chats', id);
 }
+
+export async function clearAllChats(): Promise<void> {
+  const db = await initDB();
+  const tx = db.transaction('chats', 'readwrite');
+  await tx.objectStore('chats').clear();
+  await tx.done;
+}
+
+export async function getStorageStats(): Promise<{ totalChats: number; totalMessages: number; storageSize: number }> {
+  const chats = await getAllChats();
+  const totalChats = chats.length;
+  const totalMessages = chats.reduce((acc, chat) => acc + chat.messages.length, 0);
+  
+  // Estimate storage size
+  const chatString = JSON.stringify(chats);
+  const storageSize = new Blob([chatString]).size;
+  
+  return { totalChats, totalMessages, storageSize };
+}

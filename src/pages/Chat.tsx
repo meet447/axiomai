@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import { Sidebar } from '../components/Sidebar';
 import { ChatWindow } from '../components/ChatWindow';
-import { getAllChats, saveChat } from '../db';
+import { getAllChats, saveChat, deleteChat } from '../db';
 import { streamChat } from '../services/api';
 import type { Chat, Message } from '../types';
 
@@ -18,6 +18,13 @@ export function Chat() {
   async function loadChats() {
     const loadedChats = await getAllChats();
     setChats(loadedChats);
+    
+    // If there are chats but none selected, select the most recent one
+    if (loadedChats.length > 0 && !selectedChatId) {
+      // Sort by updatedAt in descending order and select the first one
+      const sortedChats = [...loadedChats].sort((a, b) => b.updatedAt - a.updatedAt);
+      setSelectedChatId(sortedChats[0].id);
+    }
   }
 
   function createNewChat() {
@@ -31,6 +38,23 @@ export function Chat() {
     setChats((prev) => [...prev, newChat]);
     setSelectedChatId(newChat.id);
     saveChat(newChat);
+  }
+
+  async function handleDeleteChat(id: string) {
+    await deleteChat(id);
+    setChats((prev) => prev.filter((chat) => chat.id !== id));
+    
+    // If the deleted chat was selected, select another one or null
+    if (selectedChatId === id) {
+      const remainingChats = chats.filter((chat) => chat.id !== id);
+      if (remainingChats.length > 0) {
+        // Select the most recent chat
+        const sortedChats = [...remainingChats].sort((a, b) => b.updatedAt - a.updatedAt);
+        setSelectedChatId(sortedChats[0].id);
+      } else {
+        setSelectedChatId(null);
+      }
+    }
   }
 
   async function handleSendMessage(content: string, model: string) {
@@ -148,6 +172,7 @@ export function Chat() {
         selectedChat={selectedChatId}
         onSelectChat={setSelectedChatId}
         onNewChat={createNewChat}
+        onDeleteChat={handleDeleteChat}
       />
       <ChatWindow 
         chat={selectedChat} 

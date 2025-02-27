@@ -43,3 +43,57 @@ textarea {
   min-height: 44px;
   max-height: 200px;
 }
+
+/* Thinking block styling */
+.thinking-block {
+  @apply bg-gray-800/50 rounded-lg p-4 my-4 border-l-4 border-blue-500;
+}
+
+.thinking-header {
+  @apply text-blue-400 font-semibold mb-2;
+}
+
+.thinking-content {
+  @apply text-gray-300 whitespace-pre-wrap;
+}
+
+/* Enhance markdown styling */
+.prose pre {
+  @apply bg-gray-800 rounded-lg p-4;
+}
+
+.prose code {
+  @apply bg-gray-800 px-1 py-0.5 rounded text-blue-300;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  @apply text-white;
+}
+
+.prose strong {
+  @apply text-blue-300;
+}
+
+.prose a {
+  @apply text-blue-400 hover:text-blue-300 no-underline;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-gray-600 pl-4 italic text-gray-300;
+}
+
+.prose ul, .prose ol {
+  @apply pl-6;
+}
+
+.prose table {
+  @apply border-collapse;
+}
+
+.prose th, .prose td {
+  @apply border border-gray-700 p-2;
+}
+
+.prose th {
+  @apply bg-gray-800;
+}

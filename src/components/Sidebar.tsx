@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquarePlus, Search, Settings, Bot, Menu, X } from 'lucide-react';
+import { MessageSquarePlus, Search, Settings, Bot, Menu, X, Trash2 } from 'lucide-react';
 import type { Chat } from '../types';
 
 interface SidebarProps {
@@ -8,10 +8,19 @@ interface SidebarProps {
   selectedChat: string | null;
   onSelectChat: (id: string) => void;
   onNewChat: () => void;
+  onDeleteChat: (id: string) => void;
 }
 
-export function Sidebar({ chats, selectedChat, onSelectChat, onNewChat }: SidebarProps) {
+export function Sidebar({ chats, selectedChat, onSelectChat, onNewChat, onDeleteChat }: SidebarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredChats = searchTerm 
+    ? chats.filter(chat => 
+        chat.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        chat.messages.some(msg => msg.content.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+    : chats;
 
   const sidebarContent = (
     <>
@@ -36,33 +45,54 @@ export function Sidebar({ chats, selectedChat, onSelectChat, onNewChat }: Sideba
           <input
             type="text"
             placeholder="Search chats..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-gray-800 text-white pl-10 pr-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-2 py-4">
-        {chats.map((chat) => (
-          <button
+        {filteredChats.length === 0 && (
+          <div className="text-center text-gray-400 py-4">
+            {searchTerm ? 'No chats found' : 'No chats yet'}
+          </div>
+        )}
+        {filteredChats.map((chat) => (
+          <div
             key={chat.id}
-            onClick={() => {
-              onSelectChat(chat.id);
-              setIsMobileMenuOpen(false);
-            }}
-            className={`w-full text-left px-3 py-2 rounded-lg mb-1 hover:bg-gray-800 transition-colors ${
+            className={`flex items-center w-full text-left px-3 py-2 rounded-lg mb-1 hover:bg-gray-800 transition-colors ${
               selectedChat === chat.id ? 'bg-gray-800' : ''
             }`}
           >
-            <h3 className="text-white text-sm font-medium truncate">{chat.title}</h3>
-            <p className="text-gray-400 text-xs truncate">
-              {chat.messages[chat.messages.length - 1]?.content || 'No messages'}
-            </p>
-          </button>
+            <button
+              onClick={() => {
+                onSelectChat(chat.id);
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex-1 text-left"
+            >
+              <h3 className="text-white text-sm font-medium truncate">{chat.title}</h3>
+              <p className="text-gray-400 text-xs truncate">
+                Continue Chatting
+              </p>
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteChat(chat.id);
+              }}
+              className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-gray-700 rounded-md"
+              aria-label="Delete chat"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
         ))}
       </div>
 
       <div className="p-4 border-t border-gray-800">
-        <Link to="/" className="flex items-center text-gray-400 hover:text-white gap-2 px-2">
+        <Link to="/settings" className="flex items-center text-gray-400 hover:text-white gap-2 px-2">
           <Settings size={20} />
           <span>Settings</span>
         </Link>

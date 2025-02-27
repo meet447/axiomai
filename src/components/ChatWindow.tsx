@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import type { Chat } from '../types';
+import { marked } from 'marked';
 
 interface ChatWindowProps {
   chat: Chat | null;
@@ -42,27 +43,50 @@ export function ChatWindow({ chat, onSendMessage, isStreaming }: ChatWindowProps
     }
   };
 
+  // Function to render markdown content safely
+  const renderMarkdown = (content: string) => {
+    try {
+      // Process thinking tags before rendering markdown
+      let processedContent = content;
+      const thinkRegex = /<think>([\s\S]*?)<\/think>/g;
+      
+      processedContent = processedContent.replace(thinkRegex, (match, thinking) => {
+        return `<div class="thinking-block"><div class="thinking-header">Thinking...</div><div class="thinking-content">${thinking}</div></div>`;
+      });
+      
+      const html = marked(processedContent, { breaks: true });
+      return { __html: html };
+    } catch (error) {
+      console.error('Error parsing markdown:', error);
+      return { __html: content };
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col bg-gray-950">
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto py-6 space-y-6">
-          {chat.messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2 ${
-                  msg.role === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-800 text-gray-100'
-                }`}
-              >
-                <p className="whitespace-pre-wrap">{msg.content}</p>
-                <div className="mt-1 text-xs opacity-70">
-                  {msg.model} • {new Date(msg.timestamp).toLocaleTimeString()}
+        <div className="max-w-4xl mx-auto py-6">
+          {chat.messages.map((msg, index) => (
+            <div key={`${msg.id}-${index}`} className="mb-6">
+              {msg.role === 'user' ? (
+                <div className="flex justify-end mb-2">
+                  <div className="bg-blue-600 text-white rounded-2xl px-4 py-2 max-w-[85%]">
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                    <div className="mt-1 text-xs opacity-70">
+                      {new Date(msg.timestamp).toLocaleTimeString()}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="mb-2">
+                  <div className="prose prose-invert prose-lg max-w-none px-4">
+                    <div dangerouslySetInnerHTML={renderMarkdown(msg.content)} />
+                    <div className="text-xs text-gray-400 mt-1">
+                      {msg.model} • {new Date(msg.timestamp).toLocaleTimeString()}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
           <div ref={messagesEndRef} />
